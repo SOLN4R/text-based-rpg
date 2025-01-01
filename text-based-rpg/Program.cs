@@ -1,52 +1,31 @@
-﻿// Arrays
+﻿// Methods
 
 Console.WriteLine("Welcome to the text-based role-playing game!");
 
-string? name;
-var health = 100;
-var level = 1;
-var strength = 10;
+var characterName = InputCharacterName();
+var characterHealth = 100;
+var characterLevel = 1;
+var characterStrength = 10;
 
-// Requesting a character name
-while (true)
-{
-    Console.Write("Enter the character's name: ");
-    name = Console.ReadLine();
-    if (string.IsNullOrWhiteSpace(name))
-    {
-        Console.WriteLine("The name can't be empty! Try again.");
-        continue;
-    }
-    break;
-}
-
-// Character information output
-Console.WriteLine("\nYour character has been created!");
-Console.WriteLine($"Name:\t\t{name}");
-Console.WriteLine($"Health:\t\t{health}");
-Console.WriteLine($"Level:\t\t{level}");
-Console.WriteLine($"Strength:\t{strength}");
+PrintCharacterInfo("Your character has been created!", characterName, characterHealth, characterLevel, characterStrength);
 
 // Enemies
-string[] enemyNames = ["Goblin", "Orc", "Troll", "Bandit", "Wolf"];
 var destroyedEnemies = new List<string>();
-var destroyedEnemiesCount = 0;
 
 // Game cycle
 var random = new Random();
 var isPlaying = true;
 while (isPlaying)
 {
-    var enemyName = enemyNames[random.Next(enemyNames.Length)];
-    var enemyHealth = random.Next(30, 100);
-    var enemyStrength = random.Next(5, 24);
+    
+    var (enemyName, enemyHealth, enemyStrength) = GenerateEnemy(random);
     var enemyMaxHealth = enemyHealth;
-    Console.WriteLine($"\nYou have met the enemy:\nName: {enemyName} | Health: {enemyHealth} | Strength: {enemyStrength}).");
+    
     var isFighting = true;
     while (isFighting)
     {
         // Fight status
-        Console.WriteLine($"\nFight stats:\nYour health: {health}\nEnemy health: {enemyHealth}");
+        Console.WriteLine($"\nFight stats:\nYour health: {characterHealth}\nEnemy health: {enemyHealth}");
         
         // Choosing an action
         Console.WriteLine("\nSelect an action:\n1. Attack\n2. Defend\n3. Quit");
@@ -68,32 +47,26 @@ while (isPlaying)
             case 1: // attack
             {
                 Console.WriteLine("You have chosen to attack the enemy!");
-                health -= enemyStrength;
-                if (health <= 0)
+                characterHealth -= enemyStrength;
+                if (characterHealth <= 0)
                 {
                     Console.WriteLine("You are destroyed!");
                     isPlaying = false;
                     isFighting = false;
                     break;
                 }
-                enemyHealth -= strength;
+                enemyHealth -= characterStrength;
                 if (enemyHealth <= 0)
                 {
                     Console.WriteLine("You have destroyed the enemy.");
-                    level++;
-                    strength += 5;
-                    if (health <= 90)
+                    characterLevel++;
+                    characterStrength += 5;
+                    if (characterHealth <= 90)
                     {
-                        health += 10;
+                        characterHealth += 10;
                     }
-                    Console.WriteLine($"Your level has increased to {level}! Strength: {strength}, Health: {health}");
-                    destroyedEnemies.Add($"{enemyName} (Strength: {enemyStrength} | Health: {enemyMaxHealth})");
-                    destroyedEnemiesCount++;
-                    if (destroyedEnemiesCount >= 100)
-                    {
-                        Console.WriteLine("You have completed the game!");
-                        isPlaying = false;
-                    }
+                    Console.WriteLine($"Your level has increased to {characterLevel}! Strength: {characterStrength}, Health: {characterHealth}");
+                    destroyedEnemies.Add($"{enemyName}: Health: {enemyMaxHealth} | Strength: {enemyStrength}");
                     isFighting = false;
                 }
                 break;
@@ -101,9 +74,9 @@ while (isPlaying)
             case 2: // defend
             {
                 Console.WriteLine("You chose to defend yourself!");
-                if (health <= 90)
+                if (characterHealth <= 90)
                 {
-                    health += 10;
+                    characterHealth += 10;
                     Console.WriteLine("Your health is increased.");
                 }
                 break;
@@ -133,9 +106,55 @@ while (isPlaying)
 }
 Console.WriteLine("\nThe game has ended.");
 
-// Enemies defeated history
-Console.WriteLine("Enemies defeated:");
-for (var i = 0; i < destroyedEnemies.Count; i++)
+PrintDefeatedEnemies(destroyedEnemies);
+
+return;
+
+string InputCharacterName()
 {
-    Console.WriteLine($"{i+1}. {destroyedEnemies[i]}");
+    string? input;
+    while (true)
+    {
+        Console.Write("Enter the character's name: ");
+        input = Console.ReadLine();
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            Console.WriteLine("The name can't be empty! Try again.");
+            continue;
+        }
+        break;
+    }
+    return input;
+}
+
+void PrintCharacterInfo(string message, string name, int health, int level, int strength)
+{
+    Console.WriteLine($"\n{message}");
+    Console.WriteLine($"Name:\t\t{name}");
+    Console.WriteLine($"Health:\t\t{health}");
+    Console.WriteLine($"Level:\t\t{level}");
+    Console.WriteLine($"Strength:\t{strength}");
+}
+
+(string, int, int) GenerateEnemy(Random rand)
+{
+    List<string> enemyNames = ["Goblin", "Orc", "Troll", "Bandit", "Wolf"];
+    var name = enemyNames[rand.Next(enemyNames.Count)];
+    var health = rand.Next(30, 100);
+    var strength = rand.Next(5, 24);
+    Console.WriteLine($"\nYou have met the enemy:\nName: {name} | Health: {health} | Strength: {strength}).");
+    return (name, health, strength);
+}
+
+void PrintDefeatedEnemies(List<string> enemies)
+{
+    if (enemies.Count == 0)
+    {
+        return;
+    }
+    Console.WriteLine("Enemies defeated:");
+    for (var i = 0; i < enemies.Count; i++)
+    {
+        Console.WriteLine($"{i+1}. {enemies[i]}");
+    }
 }
