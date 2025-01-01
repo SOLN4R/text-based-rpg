@@ -1,4 +1,4 @@
-﻿// Cycles
+﻿// Arrays
 
 Console.WriteLine("Welcome to the text-based role-playing game!");
 
@@ -27,14 +27,21 @@ Console.WriteLine($"Health:\t\t{health}");
 Console.WriteLine($"Level:\t\t{level}");
 Console.WriteLine($"Strength:\t{strength}");
 
+// Enemies
+string[] enemyNames = ["Goblin", "Orc", "Troll", "Bandit", "Wolf"];
+var destroyedEnemies = new List<string>();
+var destroyedEnemiesCount = 0;
+
 // Game cycle
 var random = new Random();
 var isPlaying = true;
 while (isPlaying)
 {
+    var enemyName = enemyNames[random.Next(enemyNames.Length)];
     var enemyHealth = random.Next(30, 100);
-    var enemyStrength = random.Next(5, 10);
-    Console.WriteLine($"\nYou have met the enemy (Health: {enemyHealth} | Strength: {enemyStrength}).");
+    var enemyStrength = random.Next(5, 24);
+    var enemyMaxHealth = enemyHealth;
+    Console.WriteLine($"\nYou have met the enemy:\nName: {enemyName} | Health: {enemyHealth} | Strength: {enemyStrength}).");
     var isFighting = true;
     while (isFighting)
     {
@@ -66,6 +73,7 @@ while (isPlaying)
                 {
                     Console.WriteLine("You are destroyed!");
                     isPlaying = false;
+                    isFighting = false;
                     break;
                 }
                 enemyHealth -= strength;
@@ -79,6 +87,13 @@ while (isPlaying)
                         health += 10;
                     }
                     Console.WriteLine($"Your level has increased to {level}! Strength: {strength}, Health: {health}");
+                    destroyedEnemies.Add($"{enemyName} (Strength: {enemyStrength} | Health: {enemyMaxHealth})");
+                    destroyedEnemiesCount++;
+                    if (destroyedEnemiesCount >= 100)
+                    {
+                        Console.WriteLine("You have completed the game!");
+                        isPlaying = false;
+                    }
                     isFighting = false;
                 }
                 break;
@@ -96,25 +111,31 @@ while (isPlaying)
             case 3: // quit
             {
                 Console.Write("Are you sure you want to quit? (yes/no): ");
-                string? confirmation = Console.ReadLine()?.ToLower();
-                if (confirmation is "yes" or "y")
+                var confirmation = Console.ReadLine()?.ToLower();
+                switch (confirmation)
                 {
-                    isFighting = false;
-                    isPlaying = false;
-                    Console.WriteLine("You chose to quit!");
-                }
-                else if (confirmation is "no" or "n")
-                {
-                    Console.WriteLine("Returning to the fight!");
-                }
-                else
-                {
-                    Console.WriteLine("Invalid input. Please type 'yes' or 'no'.");
+                    case "yes" or "y":
+                        isFighting = false;
+                        isPlaying = false;
+                        Console.WriteLine("You chose to quit!");
+                        break;
+                    case "no" or "n":
+                        Console.WriteLine("Returning to the fight!");
+                        break;
+                    default:
+                        Console.WriteLine("Invalid input. Please type 'yes' or 'no'.");
+                        break;
                 }
                 break;
             }
         }
     }
 }
+Console.WriteLine("\nThe game has ended.");
 
-Console.WriteLine("The game has ended.");
+// Enemies defeated history
+Console.WriteLine("Enemies defeated:");
+for (var i = 0; i < destroyedEnemies.Count; i++)
+{
+    Console.WriteLine($"{i+1}. {destroyedEnemies[i]}");
+}
