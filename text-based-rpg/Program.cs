@@ -1,160 +1,141 @@
-﻿// Methods
+﻿// OOP Basics (Classes and Objects)
+namespace text_based_rpg;
 
-Console.WriteLine("Welcome to the text-based role-playing game!");
-
-var characterName = InputCharacterName();
-var characterHealth = 100;
-var characterLevel = 1;
-var characterStrength = 10;
-
-PrintCharacterInfo("Your character has been created!", characterName, characterHealth, characterLevel, characterStrength);
-
-// Enemies
-var destroyedEnemies = new List<string>();
-
-// Game cycle
-var random = new Random();
-var isPlaying = true;
-while (isPlaying)
+internal static class Program
 {
-    
-    var (enemyName, enemyHealth, enemyStrength) = GenerateEnemy(random);
-    var enemyMaxHealth = enemyHealth;
-    
-    var isFighting = true;
-    while (isFighting)
+    private static void Main()
     {
-        // Fight status
-        Console.WriteLine($"\nFight stats:\nYour health: {characterHealth}\nEnemy health: {enemyHealth}");
+        Console.WriteLine("Welcome to the text-based role-playing game!");
+
+        var character = new Character(InputCharacterName());
+        character.PrintCharacterInfo("Your character has been created!");
+
+        // Enemies
+        var enemiesList = new List<Enemy>
+        {
+            new Enemy("Goblin", 50, 10),
+            new Enemy("Orc", 70, 15),
+            new Enemy("Troll", 100, 20),
+            new Enemy("Bandit", 60, 12),
+            new Enemy("Wolf", 40, 8)
+        };
         
-        // Choosing an action
-        Console.WriteLine("\nSelect an action:\n1. Attack\n2. Defend\n3. Quit");
-        int action;
+        var destroyedEnemies = new List<string>();
+
+        // Game cycle
+        var random = new Random();
+        var isPlaying = true;
+        while (isPlaying)
+        {
+
+            var enemy = enemiesList[random.Next(enemiesList.Count)];
+            enemy.PrintEnemyInfo("You have met the enemy:");
+            
+            var isFighting = true;
+            while (isFighting)
+            {
+                PrintFightingStatus(character.GetHealth(), enemy.GetName(), enemy.GetHealth());
+                
+                // Action processing
+                switch (ChoosingAction())
+                {
+                    case 1: // attack
+                    {
+                        Console.WriteLine("You have chosen to attack the enemy!");
+                        character.TakeDamage(enemy.GetStrength());
+                        if (!character.IsAlive())
+                        {
+                            isPlaying = false;
+                            isFighting = false;
+                            break;
+                        }
+                        
+                        enemy.TakeDamage(character.GetStrength());
+                        
+                        if (enemy.IsDead())
+                        {
+                            character.LevelUp();
+                            destroyedEnemies.Add($"{enemy.GetName()}: Health: {enemy.GetHealthMax()} | Strength: {enemy.GetStrength()}");
+                            isFighting = false;
+                        }
+                        break;
+                    }
+                    case 2: // defend
+                    {
+                        Console.WriteLine("You chose to defend yourself!");
+                        character.Heal(10);
+                        break;
+                    }
+                    case 3: // quit
+                    {
+                        Console.Write("Are you sure you want to quit? (yes/no): ");
+                        var confirmation = Console.ReadLine()?.ToLower();
+                        switch (confirmation)
+                        {
+                            case "yes" or "y":
+                                isFighting = false;
+                                isPlaying = false;
+                                Console.WriteLine("You chose to quit!");
+                                break;
+                            case "no" or "n":
+                                Console.WriteLine("Returning to the fight!");
+                                break;
+                            default:
+                                Console.WriteLine("Invalid input. Please type 'yes' or 'no'.");
+                                break;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        Console.WriteLine("\nThe game has ended.");
+
+        PrintDefeatedEnemies(destroyedEnemies);
+    }
+
+    private static string InputCharacterName()
+    {
+        string? input;
         while (true)
         {
-            Console.Write("\nEnter the action: ");
-            if (!int.TryParse(Console.ReadLine(), out action) || action < 1 || action > 3)
+            Console.Write("Enter the character's name: ");
+            input = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(input))
             {
-                Console.WriteLine("Wrong input, try again.");
+                Console.WriteLine("The name can't be empty! Try again.");
                 continue;
             }
             break;
         }
-        
-        // Action processing
-        switch (action)
+        return input;
+    }
+
+    private static void PrintFightingStatus(int characterHealth, string enemyName, int enemyHealth)
+    {
+        Console.WriteLine($"\nFight stats:\nYour health: {characterHealth}\n{enemyName} health: {enemyHealth}");
+    }
+
+    private static int ChoosingAction()
+    {
+        Console.WriteLine("\nSelect an action:\n1. Attack\n2. Defend\n3. Quit");
+        while (true)
         {
-            case 1: // attack
-            {
-                Console.WriteLine("You have chosen to attack the enemy!");
-                characterHealth -= enemyStrength;
-                if (characterHealth <= 0)
-                {
-                    Console.WriteLine("You are destroyed!");
-                    isPlaying = false;
-                    isFighting = false;
-                    break;
-                }
-                enemyHealth -= characterStrength;
-                if (enemyHealth <= 0)
-                {
-                    Console.WriteLine("You have destroyed the enemy.");
-                    characterLevel++;
-                    characterStrength += 5;
-                    if (characterHealth <= 90)
-                    {
-                        characterHealth += 10;
-                    }
-                    Console.WriteLine($"Your level has increased to {characterLevel}! Strength: {characterStrength}, Health: {characterHealth}");
-                    destroyedEnemies.Add($"{enemyName}: Health: {enemyMaxHealth} | Strength: {enemyStrength}");
-                    isFighting = false;
-                }
-                break;
-            }
-            case 2: // defend
-            {
-                Console.WriteLine("You chose to defend yourself!");
-                if (characterHealth <= 90)
-                {
-                    characterHealth += 10;
-                    Console.WriteLine("Your health is increased.");
-                }
-                break;
-            }
-            case 3: // quit
-            {
-                Console.Write("Are you sure you want to quit? (yes/no): ");
-                var confirmation = Console.ReadLine()?.ToLower();
-                switch (confirmation)
-                {
-                    case "yes" or "y":
-                        isFighting = false;
-                        isPlaying = false;
-                        Console.WriteLine("You chose to quit!");
-                        break;
-                    case "no" or "n":
-                        Console.WriteLine("Returning to the fight!");
-                        break;
-                    default:
-                        Console.WriteLine("Invalid input. Please type 'yes' or 'no'.");
-                        break;
-                }
-                break;
-            }
+            Console.Write("\nEnter the action: ");
+            if (int.TryParse(Console.ReadLine(), out var action) && action is >= 1 and <= 3) return action;
+            Console.WriteLine("Wrong input, try again.");
         }
     }
-}
-Console.WriteLine("\nThe game has ended.");
-
-PrintDefeatedEnemies(destroyedEnemies);
-
-return;
-
-string InputCharacterName()
-{
-    string? input;
-    while (true)
+    private static void PrintDefeatedEnemies(List<string> enemies)
     {
-        Console.Write("Enter the character's name: ");
-        input = Console.ReadLine();
-        if (string.IsNullOrWhiteSpace(input))
+        if (enemies.Count == 0)
         {
-            Console.WriteLine("The name can't be empty! Try again.");
-            continue;
+            return;
         }
-        break;
-    }
-    return input;
-}
-
-void PrintCharacterInfo(string message, string name, int health, int level, int strength)
-{
-    Console.WriteLine($"\n{message}");
-    Console.WriteLine($"Name:\t\t{name}");
-    Console.WriteLine($"Health:\t\t{health}");
-    Console.WriteLine($"Level:\t\t{level}");
-    Console.WriteLine($"Strength:\t{strength}");
-}
-
-(string, int, int) GenerateEnemy(Random rand)
-{
-    List<string> enemyNames = ["Goblin", "Orc", "Troll", "Bandit", "Wolf"];
-    var name = enemyNames[rand.Next(enemyNames.Count)];
-    var health = rand.Next(30, 100);
-    var strength = rand.Next(5, 24);
-    Console.WriteLine($"\nYou have met the enemy:\nName: {name} | Health: {health} | Strength: {strength}).");
-    return (name, health, strength);
-}
-
-void PrintDefeatedEnemies(List<string> enemies)
-{
-    if (enemies.Count == 0)
-    {
-        return;
-    }
-    Console.WriteLine("Enemies defeated:");
-    for (var i = 0; i < enemies.Count; i++)
-    {
-        Console.WriteLine($"{i+1}. {enemies[i]}");
+        Console.WriteLine("Enemies defeated:");
+        for (var i = 0; i < enemies.Count; i++)
+        {
+            Console.WriteLine($"{i+1}. {enemies[i]}");
+        }
     }
 }
