@@ -1,4 +1,4 @@
-﻿// Collection: List
+﻿// OOP: Inheritance and Polymorphism
 namespace text_based_rpg;
 
 internal static class Program
@@ -13,11 +13,12 @@ internal static class Program
         // Enemies
         var enemiesList = new List<Enemy>
         {
-            new Enemy("Goblin", 50, 10),
-            new Enemy("Orc", 70, 15),
-            new Enemy("Troll", 100, 20),
-            new Enemy("Bandit", 60, 12),
-            new Enemy("Wolf", 40, 8)
+            new BasicEnemy("Goblin", 50, 10),
+            new BasicEnemy("Orc", 70, 15),
+            new BasicEnemy("Troll", 100, 20),
+            new BasicEnemy("Bandit", 60, 12),
+            new BasicEnemy("Wolf", 40, 8),
+            new BossEnemy("BigWolf", 80, 8)
         };
         
         var destroyedEnemies = new List<string>();
@@ -42,7 +43,8 @@ internal static class Program
                     case 1: // attack
                     {
                         Console.WriteLine("You have chosen to attack the enemy!");
-                        character.TakeDamage(enemy.GetStrength(), enemy.GetName());
+                        enemy.Attack(character);
+                        
                         if (!character.IsAlive())
                         {
                             isPlaying = false;
@@ -56,6 +58,12 @@ internal static class Program
                         {
                             character.LevelUp();
                             destroyedEnemies.Add($"{enemy.GetName()}: Health: {enemy.GetHealthMax()} | Strength: {enemy.GetStrength()}");
+                            enemiesList.Remove(enemy);
+                            if (enemiesList.Count == 0)
+                            {
+                                Console.WriteLine("All enemies have been defeated! You win!");
+                                isPlaying = false;
+                            }
                             isFighting = false;
                         }
                         break;

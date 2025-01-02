@@ -41,7 +41,6 @@ public class Character(string name)
     public void TakeDamage(int damage)
     {
         Health -= damage;
-        Console.WriteLine($"You've been dealt {damage} damage.");
     }
 
     public void TakeDamage(int damage, string source)

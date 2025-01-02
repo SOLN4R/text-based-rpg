@@ -2,10 +2,10 @@
 
 public class Enemy(string name, int health, int strength)
 {
-    private string Name { get; set; } = name;
+    protected string Name { get; set; } = name;
     private int Health { get; set; } = health;
     private int HealthMax { get; set; } = health;
-    private int Strength { get; set; } = strength;
+    protected int Strength { get; set; } = strength;
 
     public string GetName()
     {
@@ -35,6 +35,12 @@ public class Enemy(string name, int health, int strength)
         Console.WriteLine($"Strength:\t{Strength}");
     }
 
+    public virtual void Attack(Character character)
+    {
+        character.TakeDamage(Strength);
+        Console.WriteLine($"{Name} attacks {character.GetName()} for {Strength} damage!");
+    }
+
     public void TakeDamage(int damage)
     {
         Health -= damage;
@@ -45,5 +51,18 @@ public class Enemy(string name, int health, int strength)
         if (Health > 0) return false;
         Console.WriteLine($"{Name} is dead.");
         return true;
+    }
+}
+
+public class BasicEnemy(string name, int health, int strength) 
+    : Enemy(name, health, strength) {}
+
+public class BossEnemy(string name, int health, int strength) 
+    : Enemy(name, health, strength)
+{
+    public override void Attack(Character character)
+    {
+        character.TakeDamage(Strength * 2); 
+        Console.WriteLine($"{Name} attacks {character.GetName()} for {Strength} damage!");
     }
 }
