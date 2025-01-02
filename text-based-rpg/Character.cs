@@ -6,6 +6,8 @@ public class Character(string name)
     private int Health { get; set; } = 100;
     private int Level { get; set; } = 1;
     private int Strength { get; set; } = 10;
+    
+    private List<string> Inventory { get; set; } = new List<string>();
 
     public string GetName()
     {
@@ -39,6 +41,13 @@ public class Character(string name)
     public void TakeDamage(int damage)
     {
         Health -= damage;
+        Console.WriteLine($"You've been dealt {damage} damage.");
+    }
+
+    public void TakeDamage(int damage, string source)
+    {
+        Health -= damage;
+        Console.WriteLine($"You've been dealt {damage} damage by {source}.");
     }
 
     public bool IsAlive()
@@ -61,10 +70,36 @@ public class Character(string name)
         Console.WriteLine($"Your level has increased to {Level}! Strength: {Strength}, Health: {Health}");
     }
 
-    public void Heal(int heal)
+    public void Heal(int amount)
     {
-        if (Health > 100 - heal) return;
-        Console.WriteLine("Your health is increased.");
-        Health += heal;
+        Health = Math.Min(Health + amount, 100);
+        Console.WriteLine($"Health restored by {amount}. Current health: {Health}");
+    }
+
+    public void AddItem(string item)
+    {
+        Inventory.Add(item);
+        Console.WriteLine($"Added item: {item}");
+    }
+
+    public void RemoveItem(string item)
+    {
+        Console.WriteLine(Inventory.Remove(item) ? $"Removed item: {item}" : $"Item {item} not found");
+    }
+
+    public void ShowInventory()
+    {
+        Console.WriteLine("\nInventory:");
+        foreach (var item in Inventory)
+        {
+            Console.WriteLine($"- {item}");
+        }
+    }
+
+    public bool IsInventoryEmpty()
+    {
+        if (Inventory.Count != 0) return false;
+        Console.WriteLine("Inventory is empty!");
+        return true;
     }
 }

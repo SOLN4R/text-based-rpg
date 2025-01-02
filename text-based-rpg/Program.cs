@@ -1,4 +1,4 @@
-﻿// OOP Basics (Classes and Objects)
+﻿// Collection: List
 namespace text_based_rpg;
 
 internal static class Program
@@ -7,7 +7,7 @@ internal static class Program
     {
         Console.WriteLine("Welcome to the text-based role-playing game!");
 
-        var character = new Character(InputCharacterName());
+        var character = new Character(InputText("Enter the character's name:"));
         character.PrintCharacterInfo("Your character has been created!");
 
         // Enemies
@@ -42,7 +42,7 @@ internal static class Program
                     case 1: // attack
                     {
                         Console.WriteLine("You have chosen to attack the enemy!");
-                        character.TakeDamage(enemy.GetStrength());
+                        character.TakeDamage(enemy.GetStrength(), enemy.GetName());
                         if (!character.IsAlive())
                         {
                             isPlaying = false;
@@ -86,6 +86,11 @@ internal static class Program
                         }
                         break;
                     }
+                    case 4: // inventory
+                    {
+                        ManageInventory(character);
+                        break;
+                    }
                 }
             }
         }
@@ -94,16 +99,16 @@ internal static class Program
         PrintDefeatedEnemies(destroyedEnemies);
     }
 
-    private static string InputCharacterName()
+    private static string InputText(string header)
     {
         string? input;
         while (true)
         {
-            Console.Write("Enter the character's name: ");
+            Console.Write($"\n{header} ");
             input = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(input))
             {
-                Console.WriteLine("The name can't be empty! Try again.");
+                Console.WriteLine("Invalid input! Try again.");
                 continue;
             }
             break;
@@ -118,11 +123,11 @@ internal static class Program
 
     private static int ChoosingAction()
     {
-        Console.WriteLine("\nSelect an action:\n1. Attack\n2. Defend\n3. Quit");
+        Console.WriteLine("\nSelect an action:\n1. Attack\n2. Defend\n3. Quit\n4. Inventory");
         while (true)
         {
             Console.Write("\nEnter the action: ");
-            if (int.TryParse(Console.ReadLine(), out var action) && action is >= 1 and <= 3) return action;
+            if (int.TryParse(Console.ReadLine(), out var action) && action is >= 1 and <= 4) return action;
             Console.WriteLine("Wrong input, try again.");
         }
     }
@@ -136,6 +141,49 @@ internal static class Program
         for (var i = 0; i < enemies.Count; i++)
         {
             Console.WriteLine($"{i+1}. {enemies[i]}");
+        }
+    }
+
+    private static void ManageInventory(Character character)
+    {
+        while (true)
+        {
+            Console.WriteLine("\nInventory Menu:");
+            Console.WriteLine("1. Add New Item");
+            Console.WriteLine("2. Remove Item");
+            Console.WriteLine("3. Show Inventory");
+            Console.WriteLine("4. Quit to Main Menu");
+            Console.Write("\nEnter the action: ");
+
+            switch (Console.ReadLine())
+            {
+                case "1":
+                {
+                    character.AddItem(InputText("Enter the name of the item to add:"));
+                    break;
+                }
+                case "2":
+                {
+                    if (character.IsInventoryEmpty()) break;
+                    character.RemoveItem(InputText("Enter the name of the item to delete:"));
+                    break;
+                }
+                case "3":
+                {
+                    if (character.IsInventoryEmpty()) break;
+                    character.ShowInventory();
+                    break;
+                }
+                case "4":
+                {
+                    return;
+                }
+                default:
+                {
+                    Console.WriteLine("Invalid input. Try again.");
+                    break;
+                }
+            }
         }
     }
 }
